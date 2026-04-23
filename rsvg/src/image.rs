@@ -224,11 +224,15 @@ impl Image {
 
         let dest_size = dest_rect.size();
 
-        let surface_dest_rect = Rect::from_size(dest_size.0, dest_size.1);
+        // Scale to device pixels to render at the correct resolution when zoomed. See #1142.
+        let device_rect = viewport
+            .transform
+            .transform_rect(&Rect::from_size(dest_size.0, dest_size.1));
+        let surface_dest_rect = Rect::from_size(device_rect.width(), device_rect.height());
 
         // We use ceil() to avoid chopping off the last pixel if it is partially covered.
-        let surface_width = checked_i32(dest_size.0.ceil())?;
-        let surface_height = checked_i32(dest_size.1.ceil())?;
+        let surface_width = checked_i32(device_rect.width().ceil())?;
+        let surface_height = checked_i32(device_rect.height().ceil())?;
         let surface =
             cairo::ImageSurface::create(cairo::Format::ARgb32, surface_width, surface_height)?;
 
