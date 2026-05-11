@@ -43,9 +43,11 @@ else
 endif
 
 pixbufloader_svg_install_args = [
-  '--gdk-pixbuf-moduledir',
+  '--moduledir',
   pixbuf_dep.get_variable(pkgconfig: 'gdk_pixbuf_moduledir', pkgconfig_define: ['prefix', prefix]),
+  '--queryloaders',
   gdk_pixbuf_query_loaders,
+  '--cache-file',
   pixbuf_dep.get_variable(pkgconfig: 'gdk_pixbuf_cache_file', pkgconfig_define: ['prefix', prefix])
 ]
 
