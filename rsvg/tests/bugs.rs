@@ -452,3 +452,50 @@ fn can_draw_to_non_image_surface() {
         .render_document(&cr, &viewport)
         .expect("Failed to render to non-image surface");
 }
+
+// https://gitlab.gnome.org/GNOME/librsvg/-/issues/1142
+#[test]
+fn embedded_svg_image_renders_at_device_resolution() {
+    // The href is a base64-encoded SVG equivalent to:
+    //   <svg width="10" height="10" xmlns="http://www.w3.org/2000/svg">
+    //     <rect x="0" y="0" width="5" height="5" fill="#000000"/>
+    //     <rect x="5" y="5" width="5" height="5" fill="#00ff00"/>
+    //   </svg>
+    let svg = load_svg(
+        br##"<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="10" height="10">
+  <image width="10" height="10"
+    href="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAiIGhlaWdodD0iMTAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHJlY3QgeD0iMCIgeT0iMCIgd2lkdGg9IjUiIGhlaWdodD0iNSIgZmlsbD0iIzAwMDAwMCIvPjxyZWN0IHg9IjUiIHk9IjUiIHdpZHRoPSI1IiBoZWlnaHQ9IjUiIGZpbGw9IiMwMGZmMDAiLz48L3N2Zz4="/>
+</svg>
+"##,
+    )
+    .unwrap();
+
+    let output_surf = render_document(
+        &svg,
+        SurfaceSize(20, 20),
+        |cr| cr.scale(2.0, 2.0),
+        cairo::Rectangle::new(0.0, 0.0, 10.0, 10.0),
+    )
+    .unwrap();
+
+    let reference_surf = cairo::ImageSurface::create(cairo::Format::ARgb32, 20, 20).unwrap();
+    {
+        let cr = cairo::Context::new(&reference_surf).unwrap();
+
+        cr.rectangle(0.0, 0.0, 10.0, 10.0);
+        cr.set_source_rgba(0.0, 0.0, 0.0, 1.0);
+        cr.fill().unwrap();
+
+        cr.rectangle(10.0, 10.0, 10.0, 10.0);
+        cr.set_source_rgba(0.0, 1.0, 0.0, 1.0);
+        cr.fill().unwrap();
+    }
+
+    Reference::from_surface(reference_surf)
+        .compare(&output_surf)
+        .evaluate(
+            &output_surf,
+            "embedded_svg_image_renders_at_device_resolution",
+        );
+}
