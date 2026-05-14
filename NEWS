@@ -1,3 +1,17 @@
+Version 2.62.2
+==============
+
+librsvg crate version 2.62.2
+
+librsvg-rebind crate version 0.3.0
+
+- #1142: Fix blurry embeded SVG images by rasterizing them at 
+  device resolution (Dylan Sechet).
+
+- #1229: Fix build when gobject-introspection is enabled but
+  gdk-pixbuf is disabled.
+
+
 Version 2.62.1
 ==============
 
