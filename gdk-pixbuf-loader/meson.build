@@ -37,21 +37,21 @@ pixbuf_thumbnailer = configure_file(
 )
 
 if meson.can_run_host_binaries()
-  gdk_pixbuf_query_loaders = find_program(pixbuf_dep.get_variable(pkgconfig: 'gdk_pixbuf_query_loaders', default_value: 'gdk-pixbuf-query-loaders')).path()
-else
-  gdk_pixbuf_query_loaders = pixbuf_dep.get_variable(pkgconfig: 'gdk_pixbuf_query_loaders', pkgconfig_define: ['prefix', prefix])
+  gdk_pixbuf_query_loaders = find_program(pixbuf_dep.get_variable(pkgconfig: 'gdk_pixbuf_query_loaders', default_value: 'gdk-pixbuf-query-loaders'), required: not meson.is_cross_build())
 endif
 
-pixbufloader_svg_install_args = [
-  '--gdk-pixbuf-moduledir',
-  pixbuf_dep.get_variable(pkgconfig: 'gdk_pixbuf_moduledir', pkgconfig_define: ['prefix', prefix]),
-  gdk_pixbuf_query_loaders,
-  pixbuf_dep.get_variable(pkgconfig: 'gdk_pixbuf_cache_file', pkgconfig_define: ['prefix', prefix])
-]
-
-# Tell people to run gdk-pixbuf-query-loaders manually for cross builds
-if not meson.can_run_host_binaries()
-  pixbufloader_svg_install_args += '--show-cross-message'
+if meson.can_run_host_binaries() and gdk_pixbuf_query_loaders.found()
+  pixbufloader_svg_install_args = [
+    '--moduledir',
+    pixbuf_dep.get_variable(pkgconfig: 'gdk_pixbuf_moduledir', pkgconfig_define: ['prefix', prefix]),
+    '--queryloaders',
+    gdk_pixbuf_query_loaders.full_path(),
+    '--cache-file',
+    pixbuf_dep.get_variable(pkgconfig: 'gdk_pixbuf_cache_file', pkgconfig_define: ['prefix', prefix])
+  ]
+else
+  # Tell people to run gdk-pixbuf-query-loaders manually for cross builds
+  pixbufloader_svg_install_args = ['--show-cross-message']
 endif
 
 meson.add_install_script(
