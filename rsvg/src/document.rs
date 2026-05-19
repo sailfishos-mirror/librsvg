@@ -793,7 +793,9 @@ fn load_image_with_image_rs(
     if is_supported_image_format(format) {
         let cursor = Cursor::new(&bytes);
 
-        let reader = image::ImageReader::with_format(cursor, format);
+        let mut reader = image::ImageReader::with_format(cursor, format);
+        reader.no_limits();
+
         let image = reader
             .decode()
             .map_err(|e| LoadingError::Other(format!("error decoding image: {e}")))?;
