@@ -1,3 +1,23 @@
+Version 2.62.3
+==============
+
+librsvg crate version 2.62.3
+
+librsvg-rebind crate version 0.3.0
+
+- #1093 - Remove loading limits from image-rs.  This means that raster
+  images, when embedded in SVG documents, have no limits for their
+  size or memory consumption.  The idea, for now, is that
+  security-sensitive applications that use librsvg should do their own
+  sandboxing if they want to impose memory limits.
+
+- Fix the logic for whether gdk-pixbuf-query-loaders should be run
+  during cross-compilation.  Native builds can of course use it; cross
+  builds can use it if they can run host binaries *and* an executable
+  wrapper has been set *and* the target sysroot contains the
+  corresponding gdk-pixbuf-query-loaders executable (Ross Burton).
+
+
 Version 2.62.2
 ==============
 
